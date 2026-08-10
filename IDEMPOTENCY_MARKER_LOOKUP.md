@@ -34,3 +34,25 @@ Before production use:
    verify create, exact lookup, note preservation, and cleanup.
 4. Do not register a write tool or set `ALLOW_WRITES=true` until that experiment
    and its rollback are accepted.
+
+## Controlled experiment — 2026-08-10
+
+The owner explicitly approved one real local experiment. With all hub/Hermes
+writes still disabled:
+
+1. Created one uniquely named temporary inbox task with the reserved marker in
+   its note.
+2. Exact-marker lookup returned `found` and the same task ID returned by
+   creation.
+3. ID-based readback confirmed the task name and complete marker line were
+   preserved.
+4. Deleted that exact task by ID.
+5. A final complete marker scan returned authoritative `not_found`.
+
+Result: create, lookup, identity matching, note preservation, cleanup, and
+post-cleanup absence all passed. Two approved writes occurred (one creation and
+its deletion); no fixture remains. No hub setting, Hermes configuration,
+service, or public network was changed.
+
+The experiment validates note-marker storage and exact lookup, but does not
+enable production writes. `ALLOW_WRITES=false` remains required.
