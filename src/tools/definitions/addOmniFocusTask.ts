@@ -1,3 +1,5 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatJsonResponse, formatJsonError } from "../../utils/responseFormatter.js";
 import { z } from 'zod';
 import { addOmniFocusTask, AddOmniFocusTaskParams } from '../primitives/addOmniFocusTask.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -16,7 +18,9 @@ export const schema = z.object({
   parentTaskName: z.string().optional().describe("The name of the parent task to create this task as a subtask (alternative to parentTaskId)")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface AddOmniFocusTaskArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: AddOmniFocusTaskArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     // Call the addOmniFocusTask function
     const result = await addOmniFocusTask(args as AddOmniFocusTaskParams);
@@ -48,7 +52,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: `✅ Task "${args.name}" created successfully ${locationText}${dueDateText}${plannedDateText}${tagText}.\nID: ${result.taskId}`
+          text: formatJsonResponse({ id: result.taskId, name: args.name, itemType: "task", message: `✅ Task "${args.name}" created successfully.` })
         }]
       };
     } else {
@@ -56,7 +60,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: `Failed to create task: ${result.error}`
+          text: formatJsonError("backend_execution_error", `Failed to create task: ${result.error}`)
         }],
         isError: true
       };
@@ -67,7 +71,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
     return {
       content: [{
         type: "text" as const,
-        text: `Error creating task: ${error.message}`
+        text: formatJsonError("backend_execution_error", `Error creating task: ${error.message}`)
       }],
       isError: true
     };

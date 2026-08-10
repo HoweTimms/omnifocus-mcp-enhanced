@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { z } from 'zod';
 
@@ -59,7 +60,9 @@ export function buildAttachmentContentResponse(result: {
   return { content };
 }
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface ReadTaskAttachmentArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: ReadTaskAttachmentArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   const validation = validateReadTaskAttachmentParams(args);
   if (!validation.valid) {
     return {

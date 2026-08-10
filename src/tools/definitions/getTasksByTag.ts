@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { getTasksByTag } from '../primitives/getTasksByTag.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -8,7 +9,9 @@ export const schema = z.object({
   exactMatch: z.boolean().optional().describe("Set to true for exact tag name match, false for partial (default: false)")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface GetTasksByTagArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: GetTasksByTagArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     const result = await getTasksByTag({
       tagName: args.tagName,

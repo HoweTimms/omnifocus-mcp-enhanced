@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { getForecastTasks } from '../primitives/getForecastTasks.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -8,7 +9,9 @@ export const schema = z.object({
   includeDeferredOnly: z.boolean().optional().describe("Set to true to show only deferred tasks becoming available (default: false)")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface GetForecastTasksArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: GetForecastTasksArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     const result = await getForecastTasks({
       days: args.days || 7,

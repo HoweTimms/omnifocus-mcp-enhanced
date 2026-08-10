@@ -1,3 +1,5 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatJsonResponse, formatJsonError } from "../../utils/responseFormatter.js";
 import { z } from 'zod';
 import { addProject, AddProjectParams } from '../primitives/addProject.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -15,7 +17,9 @@ export const schema = z.object({
   sequential: z.boolean().optional().describe("Whether tasks in the project should be sequential (default: false)")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface AddProjectArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: AddProjectArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     // Call the addProject function
     const result = await addProject(args as AddProjectParams);
@@ -45,7 +49,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: `✅ Project "${args.name}" created successfully ${locationText}${dueDateText}${plannedDateText}${tagText}${sequentialText}.\nID: ${result.projectId}`
+          text: formatJsonResponse({ id: result.projectId, name: args.name, itemType: "project", message: `✅ Project "${args.name}" created successfully.` })
         }]
       };
     } else {
@@ -53,7 +57,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: `Failed to create project: ${result.error}`
+          text: formatJsonError("backend_execution_error", `Failed to create project: ${result.error}`)
         }],
         isError: true
       };
@@ -64,7 +68,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
     return {
       content: [{
         type: "text" as const,
-        text: `Error creating project: ${error.message}`
+        text: formatJsonError("backend_execution_error", `Error creating project: ${error.message}`)
       }],
       isError: true
     };

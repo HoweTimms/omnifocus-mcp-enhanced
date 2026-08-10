@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { getCustomPerspectiveTasks } from '../primitives/getCustomPerspectiveTasks.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -28,7 +29,9 @@ export function resolveCustomPerspectiveDisplayMode(args: Partial<z.infer<typeof
   return 'project_tree';
 }
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface GetCustomPerspectiveTasksArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: GetCustomPerspectiveTasksArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     const result = await getCustomPerspectiveTasks({
       perspectiveName: args.perspectiveName,

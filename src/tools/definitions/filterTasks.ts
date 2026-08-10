@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { filterTasks } from '../primitives/filterTasks.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -72,7 +73,9 @@ export const schema = z.object({
   sortOrder: z.enum(["asc", "desc"]).optional().describe("Sort order (default: asc)")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface FilterTasksArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: FilterTasksArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     const result = await filterTasks(args);
 

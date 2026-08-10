@@ -1,3 +1,5 @@
+import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { getPerspectiveTasksV2 } from '../primitives/getPerspectiveTasksV2.js';
 
@@ -21,9 +23,11 @@ export const schema = z.object({
 
 export type GetPerspectiveTasksV2Params = z.infer<typeof schema>;
 
-export async function handler(params: GetPerspectiveTasksV2Params) {
+export interface GetPerspectiveTasksV2Args extends z.infer<typeof schema> {}
+
+export async function handler(args: GetPerspectiveTasksV2Args, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
-    const result = await getPerspectiveTasksV2(params);
+    const result = await getPerspectiveTasksV2(args);
     
     if (!result.success) {
       return {
@@ -44,9 +48,9 @@ export async function handler(params: GetPerspectiveTasksV2Params) {
       tasks: result.tasks || [],
       totalTasks: result.tasks?.length || 0,
       options: {
-        hideCompleted: params.hideCompleted,
-        limit: params.limit,
-        displayMode: result.displayMode || params.displayMode
+        hideCompleted: args.hideCompleted,
+        limit: args.limit,
+        displayMode: result.displayMode || args.displayMode
       },
       metadata: {
         timestamp: new Date().toISOString(),

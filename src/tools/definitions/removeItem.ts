@@ -1,3 +1,5 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatJsonResponse, formatJsonError } from "../../utils/responseFormatter.js";
 import { z } from 'zod';
 import { removeItem, RemoveItemParams } from '../primitives/removeItem.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -8,14 +10,16 @@ export const schema = z.object({
   itemType: z.enum(['task', 'project']).describe("Type of item to remove ('task' or 'project')")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface RemoveItemArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: RemoveItemArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     // Validate that either id or name is provided
     if (!args.id && !args.name) {
       return {
         content: [{
           type: "text" as const,
-          text: "Either id or name must be provided to remove an item."
+          text: formatJsonError("validation_error", "Either id or name must be provided.")
         }],
         isError: true
       };
@@ -26,7 +30,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: `Invalid item type: ${args.itemType}. Must be either 'task' or 'project'.`
+          text: formatJsonError("validation_error", `Invalid item type`)
         }],
         isError: true
       };
@@ -45,7 +49,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: `✅ ${itemTypeLabel} "${result.name}" removed successfully.`
+          text: formatJsonResponse({ id: args.id || null, name: result.name || args.name, itemType: args.itemType, message: "Removed successfully" })
         }]
       };
     } else {
@@ -66,7 +70,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: errorMsg
+          text: formatJsonError("backend_execution_error", errorMsg)
         }],
         isError: true
       };
@@ -78,7 +82,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
     return {
       content: [{
         type: "text" as const,
-        text: `Error removing ${args.itemType}: ${error.message}`
+        text: formatJsonError("backend_execution_error", `Error removing: ${error.message}`)
       }],
       isError: true
     };

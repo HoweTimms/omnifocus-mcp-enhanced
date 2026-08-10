@@ -1,3 +1,5 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatJsonResponse, formatJsonError } from "../../utils/responseFormatter.js";
 import { z } from 'zod';
 import { getInboxTasks } from '../primitives/getInboxTasks.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -6,7 +8,9 @@ export const schema = z.object({
   hideCompleted: z.boolean().optional().describe("Set to false to show completed tasks in inbox (default: true)")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface GetInboxTasksArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: GetInboxTasksArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     const result = await getInboxTasks({
       hideCompleted: args.hideCompleted !== false // Default to true
@@ -15,7 +19,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
     return {
       content: [{
         type: "text" as const,
-        text: result
+        text: formatJsonResponse(result)
       }]
     };
   } catch (err: unknown) {

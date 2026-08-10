@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { batchRemoveItems, BatchRemoveItemsParams } from '../primitives/batchRemoveItems.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -10,7 +11,9 @@ export const schema = z.object({
   })).describe("Array of items (tasks or projects) to remove")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface BatchRemoveItemsArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: BatchRemoveItemsArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     // Validate that each item has at least an ID or name
     for (const item of args.items) {

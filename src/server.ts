@@ -32,57 +32,76 @@ const server = new McpServer({
   version: "1.6.9"
 });
 
+
+import { z } from "zod";
+import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+
+/**
+ * Register a tool with localized inference decoupling.
+ * This explicit wrapper prevents the internal TypeScript resolver from hanging 
+ * on an exploding intersection union by enforcing a localized closure boundary around Zod properties.
+ */
+function registerTool<T extends z.ZodRawShape>(
+  name: string,
+  description: string,
+  shape: T,
+  handler: (args: any, extra: RequestHandlerExtra) => Promise<CallToolResult>
+) {
+  server.tool(name, description, shape, handler as any);
+}
+
 // Register tools
-server.tool(
+registerTool(
   "dump_database",
   "Gets the current state of your OmniFocus database",
   dumpDatabaseTool.schema.shape,
   dumpDatabaseTool.handler
 );
 
-server.tool(
+registerTool(
   "add_omnifocus_task",
   "Add a new task to OmniFocus",
   addOmniFocusTaskTool.schema.shape,
   addOmniFocusTaskTool.handler
 );
 
-server.tool(
+registerTool(
   "add_project",
   "Add a new project to OmniFocus",
   addProjectTool.schema.shape,
   addProjectTool.handler
 );
 
-server.tool(
+registerTool(
   "remove_item",
   "Remove a task or project from OmniFocus",
   removeItemTool.schema.shape,
   removeItemTool.handler
 );
 
-server.tool(
+registerTool(
   "edit_item",
   "Edit a task or project in OmniFocus",
   editItemTool.schema.shape,
   editItemTool.handler
 );
 
-server.tool(
+registerTool(
   "move_task",
   "Move an existing task to a project, parent task, or inbox",
   moveTaskTool.schema.shape,
   moveTaskTool.handler
 );
 
-server.tool(
+registerTool(
   "batch_add_items",
   "Add multiple tasks or projects to OmniFocus in a single operation",
   batchAddItemsTool.schema.shape,
   batchAddItemsTool.handler
 );
 
-server.tool(
+registerTool(
   "batch_remove_items",
   "Remove multiple tasks or projects from OmniFocus in a single operation",
   batchRemoveItemsTool.schema.shape,
@@ -90,21 +109,21 @@ server.tool(
 );
 
 
-server.tool(
+registerTool(
   "get_task_by_id",
   "Get information about a specific task by ID or name",
   getTaskByIdTool.schema.shape,
   getTaskByIdTool.handler
 );
 
-server.tool(
+registerTool(
   "read_task_attachment",
   "Read a task attachment reported by get_task_by_id. Images are returned as MCP image content when possible.",
   readTaskAttachmentTool.schema.shape,
   readTaskAttachmentTool.handler
 );
 
-server.tool(
+registerTool(
   "get_today_completed_tasks",
   "Get tasks completed today - view today's accomplishments",
   getTodayCompletedTasksTool.schema.shape,
@@ -112,28 +131,28 @@ server.tool(
 );
 
 // Register perspective tools
-server.tool(
+registerTool(
   "get_inbox_tasks",
   "Get tasks from OmniFocus inbox perspective",
   getInboxTasksTool.schema.shape,
   getInboxTasksTool.handler
 );
 
-server.tool(
+registerTool(
   "get_flagged_tasks", 
   "Get flagged tasks from OmniFocus with optional project filtering",
   getFlaggedTasksTool.schema.shape,
   getFlaggedTasksTool.handler
 );
 
-server.tool(
+registerTool(
   "get_forecast_tasks",
   "Get tasks from OmniFocus forecast perspective (due/deferred tasks in date range)", 
   getForecastTasksTool.schema.shape,
   getForecastTasksTool.handler
 );
 
-server.tool(
+registerTool(
   "get_tasks_by_tag",
   "Get tasks filtered by OmniFocus tags (labels like @home, @work, @urgent). Use this for tag-based filtering, NOT for custom perspective names. Tags are labels assigned to individual tasks.",
   getTasksByTagTool.schema.shape, 
@@ -141,7 +160,7 @@ server.tool(
 );
 
 // Ultimate filter tool - The most powerful task perspective engine
-server.tool(
+registerTool(
   "filter_tasks",
   "Advanced task filtering with unlimited perspective combinations - status, dates, projects, tags, search, and more",
   filterTasksTool.schema.shape,
@@ -149,14 +168,14 @@ server.tool(
 );
 
 // Custom perspective tools
-server.tool(
+registerTool(
   "list_custom_perspectives",
   "List all custom perspectives defined in OmniFocus",
   listCustomPerspectivesTool.schema.shape,
   listCustomPerspectivesTool.handler
 );
 
-server.tool(
+registerTool(
   "get_custom_perspective_tasks",
   "Get tasks from a specific OmniFocus custom perspective by name. Use this when user refers to perspective names like '今日工作安排', '今日复盘', '本周项目' etc. - these are custom views created in OmniFocus, NOT tags. Supports hierarchical tree display of task relationships.",
   getCustomPerspectiveTasksTool.schema.shape,

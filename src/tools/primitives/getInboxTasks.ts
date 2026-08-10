@@ -4,7 +4,7 @@ export interface GetInboxTasksOptions {
   hideCompleted?: boolean;
 }
 
-export async function getInboxTasks(options: GetInboxTasksOptions = {}): Promise<string> {
+export async function getInboxTasks(options: GetInboxTasksOptions = {}): Promise<any> {
   const { hideCompleted = true } = options;
 
   try {
@@ -25,33 +25,7 @@ export async function getInboxTasks(options: GetInboxTasksOptions = {}): Promise
         throw new Error(data.error);
       }
 
-      // Format the inbox tasks
-      let output = `# INBOX TASKS\n\n`;
-
-      if (data.tasks && Array.isArray(data.tasks)) {
-        if (data.tasks.length === 0) {
-          output += '📪 Inbox is empty - well done!\n';
-        } else {
-          output += `📥 Found ${data.tasks.length} task${data.tasks.length === 1 ? '' : 's'} in inbox:\n\n`;
-
-          data.tasks.forEach((task: any, index: number) => {
-            const flagSymbol = task.flagged ? '🚩 ' : '';
-            const dueDateStr = task.dueDate ? ` [DUE: ${new Date(task.dueDate).toLocaleDateString()}]` : '';
-            const plannedDateStr = task.plannedDate ? ` [PLAN: ${new Date(task.plannedDate).toLocaleDateString()}]` : '';
-            const statusStr = task.taskStatus !== 'Available' ? ` (${task.taskStatus})` : '';
-
-            output += `${index + 1}. ${flagSymbol}${task.name}${dueDateStr}${plannedDateStr}${statusStr}\n`;
-
-            if (task.note && task.note.trim()) {
-              output += `   📝 ${task.note.trim()}\n`;
-            }
-          });
-        }
-      } else {
-        output += 'No inbox data available\n';
-      }
-
-      return output;
+return data.tasks || [];
     }
 
     return 'Unexpected result format from OmniFocus';

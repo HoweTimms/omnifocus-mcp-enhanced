@@ -29,5 +29,5 @@ test('move_task handler returns validation errors for conflicting destinations',
   }, {} as any);
 
   assert.equal(result.isError, true);
-  assert.match(result.content[0].text, /Exactly one destination/);
+  assert.match(String(result.content[0].text), /Exactly one destination/);
 });

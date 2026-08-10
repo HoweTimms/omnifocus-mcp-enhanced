@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { getTaskById, GetTaskByIdParams } from '../primitives/getTaskById.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -50,7 +51,9 @@ export function formatTaskInfo(task: Awaited<ReturnType<typeof getTaskById>> ext
   return infoText;
 }
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface GetTaskByIdArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: GetTaskByIdArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     // Validate that either taskId or taskName is provided
     if (!args.taskId && !args.taskName) {

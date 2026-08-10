@@ -1,3 +1,5 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatJsonResponse, formatJsonError } from "../../utils/responseFormatter.js";
 import { z } from 'zod';
 import { editItem, EditItemParams } from '../primitives/editItem.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -33,14 +35,16 @@ export const schema = z.object({
   newProjectStatus: z.enum(['active', 'completed', 'dropped', 'onHold']).optional().describe("New status for projects")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface EditItemArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: EditItemArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     // Validate that either id or name is provided
     if (!args.id && !args.name) {
       return {
         content: [{
           type: "text" as const,
-          text: "Either id or name must be provided to edit an item."
+          text: formatJsonError("validation_error", "Either id or name must be provided.")
         }],
         isError: true
       };
@@ -61,7 +65,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: `✅ ${itemTypeLabel} "${result.name}" updated successfully${changedText}.`
+          text: formatJsonResponse({ id: result.id || args.id || null, name: result.name || null, itemType: args.itemType, message: "Updated successfully" })
         }]
       };
     } else {
@@ -82,7 +86,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: "text" as const,
-          text: errorMsg
+          text: formatJsonError("backend_execution_error", errorMsg)
         }],
         isError: true
       };
@@ -94,7 +98,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
     return {
       content: [{
         type: "text" as const,
-        text: `Error updating ${args.itemType}: ${error.message}`
+        text: formatJsonError("backend_execution_error", `Error editing: ${error.message}`)
       }],
       isError: true
     };

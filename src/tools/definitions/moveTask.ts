@@ -1,3 +1,5 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { formatJsonResponse, formatJsonError } from "../../utils/responseFormatter.js";
 import { z } from 'zod';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
 import { moveTask, MoveTaskParams } from '../primitives/moveTask.js';
@@ -28,7 +30,9 @@ function formatDestination(args: z.infer<typeof schema>): string {
   return 'destination';
 }
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface MoveTaskArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: MoveTaskArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     const result = await moveTask(args as MoveTaskParams);
 
@@ -36,7 +40,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
       return {
         content: [{
           type: 'text' as const,
-          text: `✅ Task "${result.name || args.id || args.name}" moved successfully to ${formatDestination(args)}.`
+          text: formatJsonResponse({ id: result.id || args.id, name: result.name || args.name, itemType: "task", message: "Moved successfully" })
         }]
       };
     }
@@ -44,7 +48,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
     return {
       content: [{
         type: 'text' as const,
-        text: `Failed to move task: ${result.error}`
+        text: formatJsonError("backend_execution_error", `Failed to move task: ${result.error}`)
       }],
       isError: true
     };
@@ -55,7 +59,7 @@ export async function handler(args: z.infer<typeof schema>, extra: RequestHandle
     return {
       content: [{
         type: 'text' as const,
-        text: `Error moving task: ${error.message}`
+        text: formatJsonError("backend_execution_error", `Error moving task: ${error.message}`)
       }],
       isError: true
     };

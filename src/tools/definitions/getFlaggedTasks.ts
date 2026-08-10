@@ -1,3 +1,4 @@
+import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from 'zod';
 import { getFlaggedTasks } from '../primitives/getFlaggedTasks.js';
 import { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol.js';
@@ -7,7 +8,9 @@ export const schema = z.object({
   projectFilter: z.string().optional().describe("Filter flagged tasks by project name (optional)")
 });
 
-export async function handler(args: z.infer<typeof schema>, extra: RequestHandlerExtra) {
+export interface GetFlaggedTasksArgs extends z.infer<typeof schema> {}
+
+export async function handler(args: GetFlaggedTasksArgs, extra: RequestHandlerExtra): Promise<CallToolResult> {
   try {
     const result = await getFlaggedTasks({
       hideCompleted: args.hideCompleted !== false, // Default to true
