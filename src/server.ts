@@ -15,6 +15,7 @@ import * as batchRemoveItemsTool from './tools/definitions/batchRemoveItems.js';
 import * as getTaskByIdTool from './tools/definitions/getTaskById.js';
 import * as readTaskAttachmentTool from './tools/definitions/readTaskAttachment.js';
 import * as getTodayCompletedTasksTool from './tools/definitions/getTodayCompletedTasks.js';
+import * as findTaskByIdempotencyMarkerTool from './tools/definitions/findTaskByIdempotencyMarker.js';
 // Import perspective tools
 import * as getInboxTasksTool from './tools/definitions/getInboxTasks.js';
 import * as getFlaggedTasksTool from './tools/definitions/getFlaggedTasks.js';
@@ -128,6 +129,15 @@ registerTool(
   "Get tasks completed today - view today's accomplishments",
   getTodayCompletedTasksTool.schema.shape,
   getTodayCompletedTasksTool.handler
+);
+
+// Private reconciliation capability for the local HTTP hub. The hub's exact
+// public allowlist must never advertise this implementation-only tool.
+registerTool(
+  findTaskByIdempotencyMarkerTool.INTERNAL_IDEMPOTENCY_LOOKUP_TOOL,
+  "Internal exact idempotency marker lookup",
+  findTaskByIdempotencyMarkerTool.schema.shape,
+  findTaskByIdempotencyMarkerTool.handler
 );
 
 // Register perspective tools

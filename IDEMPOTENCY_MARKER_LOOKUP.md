@@ -1,8 +1,9 @@
 # Idempotency marker lookup foundation
 
 This branch adds an internal, read-only exact-marker lookup for future safe
-task-creation reconciliation. It is not registered as an MCP tool and was not
-executed against OmniFocus during development.
+task-creation reconciliation. It is registered under the explicitly private
+name `_internal_find_task_by_idempotency_marker`; the HTTP hub's exact public
+allowlist hides it from Hermes.
 
 The proposed reserved task-note line is:
 
@@ -24,7 +25,9 @@ creation. `unknown` must pause for reconciliation.
 The TypeScript primitive accepts an injectable executor so unit tests cover the
 contract without accessing OmniFocus. Eight new tests verify exact-line script
 shape, absence of mutation statements, classification, validation, error
-handling, and fake execution. The full build passes 66 tests.
+handling, and fake execution. Two definition tests verify the private name and
+strict marker schema. The full build passes 68 tests, and stdio discovery finds
+exactly one internal lookup registration.
 
 Before production use:
 
