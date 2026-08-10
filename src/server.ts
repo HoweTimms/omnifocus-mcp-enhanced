@@ -16,6 +16,7 @@ import * as getTaskByIdTool from './tools/definitions/getTaskById.js';
 import * as readTaskAttachmentTool from './tools/definitions/readTaskAttachment.js';
 import * as getTodayCompletedTasksTool from './tools/definitions/getTodayCompletedTasks.js';
 import * as findTaskByIdempotencyMarkerTool from './tools/definitions/findTaskByIdempotencyMarker.js';
+import * as getTaskSnapshotTool from './tools/definitions/getTaskSnapshot.js';
 // Import perspective tools
 import * as getInboxTasksTool from './tools/definitions/getInboxTasks.js';
 import * as getFlaggedTasksTool from './tools/definitions/getFlaggedTasks.js';
@@ -138,6 +139,13 @@ registerTool(
   "Internal exact idempotency marker lookup",
   findTaskByIdempotencyMarkerTool.schema.shape,
   findTaskByIdempotencyMarkerTool.handler
+);
+
+registerTool(
+  getTaskSnapshotTool.INTERNAL_TASK_SNAPSHOT_TOOL,
+  "Internal exact machine-readable task snapshot",
+  getTaskSnapshotTool.schema.shape,
+  getTaskSnapshotTool.handler
 );
 
 // Register perspective tools

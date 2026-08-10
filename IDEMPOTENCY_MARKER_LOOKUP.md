@@ -59,3 +59,12 @@ service, or public network was changed.
 
 The experiment validates note-marker storage and exact lookup, but does not
 enable production writes. `ALLOW_WRITES=false` remains required.
+
+## Exact task snapshot
+
+The private `_internal_get_task_snapshot` tool delegates to the existing native
+ID lookup but returns stable JSON for write reconciliation and preimage capture.
+It requires an exact task ID, verifies returned identity, normalizes optional
+mutable fields to `null`, omits attachments from the write snapshot, and returns
+`unknown` on every failure. It is read-only and must remain outside the hub's
+public allowlist.
